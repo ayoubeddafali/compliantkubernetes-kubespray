@@ -25,6 +25,9 @@ usage() {
     echo "      args: <wc|sc> [<options>]" 1>&2
     echo "  upgrade                                     prepares config for upgrade" 1>&2
     echo "      args: <wc|sc|both> <version> prepare" 1>&2
+    echo "      args: <version> prepare" 1>&2
+    echo "  generate-groups-inventory                   generate groups static inventory" 1>&2
+    echo "      args: <prefix>" 1>&2
     exit 1
 }
 
@@ -94,6 +97,12 @@ case "${1}" in
         fi
         shift 1
         "${here}/upgrade.bash" "${@}"
+    generate-groups-inventory)
+        if [ $# -lt 2 ]; then
+            usage
+        fi
+        shift 2
+        "${here}/generate-groups-inventory.bash" "${@}"
         ;;
     *) usage ;;
 esac
