@@ -1,0 +1,20 @@
+- name: Master cis benchmark patch
+  hosts: kube_control_plane
+  become: yes  # This allows the playbook to run with sudo privileges
+
+  tasks:
+    - name: 1.1.9 Ensure that the Container Network Interface file permissions are set to 600 or more restrictive
+      become: yes  # Ensure the task runs with sudo privileges
+      command: chmod -R 600  /etc/cni
+    - name: 1.1.10 Ensure that the Container Network Interface file ownership is set to root:root
+      become: yes  # Ensure the task runs with sudo privileges
+      command: chown -R root:root /etc/cni
+    - name: 1.1.20 Ensure that the Kubernetes PKI certificate file permissions are set to 600 or more restrictive
+      become: yes  # Ensure the task runs with sudo privileges
+      command: chmod -R 600 /etc/kubernetes/pki
+    - name: 1.2.19 Ensure that the --audit-log-maxage argument is set to 30 or as appropriate
+      become: yes  # Ensure the task runs with sudo privileges
+      command: sed -i 's/audit-log-maxage=7/audit-log-maxage=30/g' /etc/kubernetes/manifests/kube-apiserver.yaml
+    - name: 1.2.20 Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate
+      become: yes  # Ensure the task runs with sudo privileges
+      command: sed -i 's/audit-log-maxbackup=1/audit-log-maxbackup=10/g' /etc/kubernetes/manifests/kube-apiserver.yaml
