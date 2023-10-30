@@ -33,6 +33,7 @@ list_groups() {
 }
 
 upgrade_groups() {
+    total_nodes=$(getGroupHosts "${config[groups_inventory_file]}" "${group}" | wc -w)
     local -a groups
     for group in $(readInventoryGroups "${config[groups_inventory_file]}" | sort); do
       if ! [[ "${group}" =~ ^(all|etcd|kube_node|.*:.*)$ ]]; then
@@ -53,7 +54,7 @@ upgrade_groups() {
     fi
     ansible-playbook upgrade-cluster.yml -b -i "${config[groups_inventory_file]}" --skip-tags=${skip_tags} --limit "kube_control_plane[0]"
 
-    for index in $(seq 0 100); do
+    for index in $(seq 0 "${total_nodes}"); do
       local -a limit
       limit=()
       for group in "${groups[@]}"; do

@@ -28,6 +28,8 @@ usage() {
     echo "      args: <version> prepare" 1>&2
     echo "  generate-groups-inventory                   generate groups static inventory" 1>&2
     echo "      args: <prefix>" 1>&2
+    echo "  sync-groups-inventory                       sync groups static inventory" 1>&2
+    echo "      args: <prefix>" 1>&2
     exit 1
 }
 

@@ -16,17 +16,17 @@ getGroupHosts() {
   local section="$2"
 
   awk -v target_group="$section" \
-             -F' ' '{ 
+             -F' ' '{
                       if ($1 ~ /^\[[a-zA-Z0-9_:]{1,}\]/)
-                        section=tolower(gensub(/\[(.+)\]/,"\\1",1,$1)) 
+                        section=tolower(gensub(/\[(.+)\]/,"\\1",1,$1))
                       else if ($1 !~ /^$/ && $1 !~ /^;/) {
-                        gsub(/^[ \t]+|[ \t]+$/, "", $1); 
+                        gsub(/^[ \t]+|[ \t]+$/, "", $1);
                         gsub(/[\[\]]/, "", $1);
                         if (section == target_group) {
                           configuration[section][$1]=""
                         }
-                      } 
-                    } 
+                      }
+                    }
                     END {
                         if ( length(configuration) > 0) {
                           for (key in configuration[target_group]) { print key }
@@ -41,7 +41,7 @@ getSection() {
   local section="$2"
 
   awk -v target_group="$section" \
-            -F' ' '{ 
+            -F' ' '{
                     if ($1 ~ /^\[[a-zA-Z0-9_:]{1,}\]/) {
                       section=tolower(gensub(/\[(.+)\]/,"\\1",1,$1))
                       if (section == target_group) print $0
@@ -50,7 +50,7 @@ getSection() {
                       if (section == target_group) {
                         print $0
                       }
-                    } 
+                    }
                   }' "${filename}"
 }
 
@@ -60,11 +60,11 @@ getHostVar() {
   local hostvar="$3"
 
   awk -v target_host="$host"  -v hostvar="$hostvar" \
-             -F' ' '{ 
+             -F' ' '{
                       if ($1 ~ /^\[[a-zA-Z0-9_]{1,}\]/)
-                        section=tolower(gensub(/\[(.+)\]/,"\\1",1,$1)) 
+                        section=tolower(gensub(/\[(.+)\]/,"\\1",1,$1))
                       else if ($1 !~ /^$/ && $1 !~ /^;/) {
-                        gsub(/^[ \t]+|[ \t]+$/, "", $1); 
+                        gsub(/^[ \t]+|[ \t]+$/, "", $1);
                         gsub(/[\[\]]/, "", $1);
                         if (section == "all") {
                           if ($1 == target_host ){
@@ -76,7 +76,7 @@ getHostVar() {
                             }
                           }
                         }
-                      } 
+                      }
                     }
                     END {
                         print value
@@ -88,11 +88,11 @@ getHostVars() {
   local host="$2"
   if [[ "$(isHostInGroup "$filename" "$host" "all")" == "true" ]]; then
     awk -v target_host="$host" \
-              -F' ' '{ 
+              -F' ' '{
                         if ($1 ~ /^\[[a-zA-Z0-9_:]{1,}\]/)
-                          section=tolower(gensub(/\[(.+)\]/,"\\1",1,$1)) 
+                          section=tolower(gensub(/\[(.+)\]/,"\\1",1,$1))
                         else if ($1 !~ /^$/ && $1 !~ /^;/) {
-                          gsub(/^[ \t]+|[ \t]+$/, "", $1); 
+                          gsub(/^[ \t]+|[ \t]+$/, "", $1);
                           gsub(/[\[\]]/, "", $1);
                           if (section == "all") {
                             if ($1 == target_host ){
@@ -102,7 +102,7 @@ getHostVars() {
                               }
                             }
                           }
-                        } 
+                        }
                       }
                       END {
                         if ( length(configuration) > 0) {
@@ -111,7 +111,7 @@ getHostVars() {
                             print ""
                           }
                       }' "${filename}"
-  else 
+  else
     log_error "Host $host is not defined"
     exit 1
   fi
@@ -125,15 +125,15 @@ setHostVar() {
 
   if [[ "$(isHostInGroup "$filename" "$host" "all")" ]]; then
     awk -v target_host="$host"  -v hostvar="$hostvar"  -v val="$value" \
-            -F' ' '{ 
+            -F' ' '{
                     exists=1
                     if ($1 ~ /^\[/) {
-                      section=tolower(gensub(/\[(.+)\]/,"\\1",1,$1)) 
+                      section=tolower(gensub(/\[(.+)\]/,"\\1",1,$1))
                       print $0
                     }
                     else if ($1 == "") print $0
                     else if ($1 !~ /^$/ && $1 !~ /^;/) {
-                      gsub(/^[ \t]+|[ \t]+$/, "", $1); 
+                      gsub(/^[ \t]+|[ \t]+$/, "", $1);
                       gsub(/[\[\]]/, "", $1);
                       if (section == "all") {
                         if ($1 == target_host ){
@@ -150,7 +150,7 @@ setHostVar() {
                         }
                       }
                       print $0
-                    } 
+                    }
                   }
     ' "${filename}" > /tmp/secondary-inventory.ini
     cp /tmp/secondary-inventory.ini "$filename"
@@ -167,14 +167,14 @@ unsetHostVar() {
 
   if [[ "$(isHostInGroup "$filename" "$host" "all")" ]]; then
     awk -v target_host="$host"  -v hostvar="$hostvar"  \
-            -F' ' '{ 
+            -F' ' '{
                     if ($1 ~ /^\[/) {
-                      section=tolower(gensub(/\[(.+)\]/,"\\1",1,$1)) 
+                      section=tolower(gensub(/\[(.+)\]/,"\\1",1,$1))
                       print $0
                     }
                     else if ($1 == "") print $0
                     else if ($1 !~ /^$/ && $1 !~ /^;/) {
-                      gsub(/^[ \t]+|[ \t]+$/, "", $1); 
+                      gsub(/^[ \t]+|[ \t]+$/, "", $1);
                       gsub(/[\[\]]/, "", $1);
                       if (section == "all") {
                         if ($1 == target_host ){
@@ -187,12 +187,12 @@ unsetHostVar() {
                         }
                       }
                       print $0
-                    } 
+                    }
                   }
     ' "${filename}" > /tmp/secondary-inventory.ini
-    cp /tmp/secondary-inventory.ini "$filename"
+    cp /tmp/secondary-inventory.ini "${filename}"
   else
-    log_error "Host $host is not defined"
+    log_error "Host ${host} is not defined"
   fi
 
 }
@@ -203,16 +203,16 @@ updateHostVar() {
   local hostvar="$3"
   local value="$4"
 
-  if [[ "$(isHostInGroup $filename $host all)" ]]; then
-    awk -v target_host="$host"  -v hostvar="$hostvar"  -v val="$value" \
-            -F' ' '{ 
+  if [[ "$(isHostInGroup "${filename}" "${host}" all)" ]]; then
+    awk -v target_host="$host"  -v hostvar="${hostvar}"  -v val="${value}" \
+            -F' ' '{
                     if ($1 ~ /^\[/) {
-                      section=tolower(gensub(/\[(.+)\]/,"\\1",1,$1)) 
+                      section=tolower(gensub(/\[(.+)\]/,"\\1",1,$1))
                       print $0
                     }
                     else if ($1 == "") print $0
                     else if ($1 !~ /^$/ && $1 !~ /^;/) {
-                      gsub(/^[ \t]+|[ \t]+$/, "", $1); 
+                      gsub(/^[ \t]+|[ \t]+$/, "", $1);
                       gsub(/[\[\]]/, "", $1);
                       if (section == "all") {
                         if ($1 == target_host ){
@@ -225,7 +225,7 @@ updateHostVar() {
                         }
                       }
                       print $0
-                    } 
+                    }
                   }
     ' "${filename}" > /tmp/secondary-inventory.ini
     cp /tmp/secondary-inventory.ini "$filename"
@@ -240,9 +240,9 @@ isHostInGroup() {
   local host="$2"
   local group="$3"
 
-  hosts="$(getGroupHosts $filename $group)"
-  for h in $hosts; do 
-    if [[ "$host" ==  "$h" ]]; then echo "true"; break; fi 
+  hosts="$(getGroupHosts "${filename}" "${group}")"
+  for h in $hosts; do
+    if [[ "$host" ==  "$h" ]]; then echo "true"; break; fi
   done
 }
 
@@ -250,11 +250,11 @@ groupExists() {
   local filename="$1"
   local group="$2"
 
-  groups="$(readInventoryGroups $filename)"
+  groups="$(readInventoryGroups "$filename")"
   for g in $groups; do
     if [[ "$group" == "$g" ]]; then  echo "true"; break; fi
-  done  
-  
+  done
+
 }
 
 addHostToGroup() {
@@ -262,8 +262,8 @@ addHostToGroup() {
   local host="$2"
   local group="$3"
 
-  hostDefined="$(isHostInGroup $filename $host all)"
-  hostExists="$(isHostInGroup $filename $host $group)"
+  hostDefined="$(isHostInGroup "$filename" "$host" all)"
+  hostExists="$(isHostInGroup "$filename" "$host" "$group")"
 
   if [[ "$hostDefined" == "true" || "$group" == "all" ]]; then
     if [[ "$hostExists" == "true" ]]; then
@@ -271,10 +271,10 @@ addHostToGroup() {
     else
       sed -i "/^\[$group\]/a\\$host" "$filename"
     fi
-  else 
+  else
     log_error "Host $host is not defined in [all] group"
     exit 1
-  fi 
+  fi
 }
 
 addHostToGroupAsLast() {
@@ -282,8 +282,8 @@ addHostToGroupAsLast() {
   local host="$2"
   local group="$3"
 
-  hostDefined="$(isHostInGroup $filename $host all)"
-  hostExists="$(isHostInGroup $filename $host $group)"
+  hostDefined="$(isHostInGroup "$filename" "$host" all)"
+  hostExists="$(isHostInGroup "$filename" "$host" "$group")"
 
   if [[ "$hostDefined" == "true" || "$group" == "all" ]]; then
     if [[ "$hostExists" == "true" ]]; then
@@ -292,38 +292,38 @@ addHostToGroupAsLast() {
       awk -v sec="[$group]" -v host="$host" 'p && $1~/\[[^]]*\]/{p=0; print host"\n"}  $1==sec{p=1} END{if (p) print host} 1' "${filename}" > /tmp/secondary-inventory.ini
       cp /tmp/secondary-inventory.ini "$filename"
     fi
-  else 
+  else
     log_error "Host $host is not defined in [all] group"
     exit 1
-  fi 
+  fi
 }
 
 removeHostFromGroup() {
   local filename="$1"
   local host="$2"
-  local group="$3" 
+  local group="$3"
 
-  if [[ "$(isHostInGroup $filename $host all)" == "true" ]]; then
+  if [[ "$(isHostInGroup "$filename" "$host" all)" == "true" ]]; then
     awk -v target_host="$host" -v target_group="$group" \
-        -F' ' '{ 
+        -F' ' '{
                 global_removal=1
                 if (target_group == "all") global_removal=0
                 if ($1 ~ /^\[/) {
-                  section=tolower(gensub(/\[(.+)\]/,"\\1",1,$1)) 
+                  section=tolower(gensub(/\[(.+)\]/,"\\1",1,$1))
                   print $0
                 }
                 else if ($1 == "") print $0
                 else if ($1 !~ /^$/ && $1 !~ /^;/) {
-                  gsub(/^[ \t]+|[ \t]+$/, "", $1); 
+                  gsub(/^[ \t]+|[ \t]+$/, "", $1);
                   gsub(/[\[\]]/, "", $1);
                   if ($1 == target_host ){
                     if (global_removal == 1 && target_group != section ) {
                       print $0
-                    } 
+                    }
                   } else {
                     print $0
-                  } 
-                } 
+                  }
+                }
               }
     ' "${filename}" > /tmp/secondary-inventory.ini
     cp /tmp/secondary-inventory.ini "$filename"
@@ -337,7 +337,7 @@ addGroup() {
   local filename="$1"
   local group="$2"
 
-  if [[ "$(groupExists $filename $group)" == "true" ]]; then 
+  if [[ "$(groupExists "$filename" "$group")" == "true" ]]; then
     log_warning "Group $group already exists"
   else
     echo -e "\n\n[$group]" >> "$filename"
