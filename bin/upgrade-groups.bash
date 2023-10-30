@@ -26,7 +26,7 @@ source "${here}/common.bash"
 source "${here}/inventory-parser.bash"
 
 list_groups() {
-    groups=$(readInventoryGroups ${config[groups_inventory_file]})
+    groups=$(readInventoryGroups "${config[groups_inventory_file]}")
     for group in $groups; do
         log_info "- $group"
     done
