@@ -16,7 +16,7 @@ getGroupHosts() {
   local section="$2"
 
   awk -v target_group="$section" \
-             -F' ' '{
+                -F' ' '{
                       if ($1 ~ /^\[[a-zA-Z0-9_:]{1,}\]/)
                         section=tolower(gensub(/\[(.+)\]/,"\\1",1,$1))
                       else if ($1 !~ /^$/ && $1 !~ /^;/) {
@@ -60,7 +60,7 @@ getHostVar() {
   local hostvar="$3"
 
   awk -v target_host="$host"  -v hostvar="$hostvar" \
-             -F' ' '{
+            -F' ' '{
                       if ($1 ~ /^\[[a-zA-Z0-9_]{1,}\]/)
                         section=tolower(gensub(/\[(.+)\]/,"\\1",1,$1))
                       else if ($1 !~ /^$/ && $1 !~ /^;/) {
