@@ -48,7 +48,7 @@ declare -A KUBE
 KUBE[sc]="${CK8S_CONFIG_PATH:-}/.state/kube_config_sc.yaml"
 KUBE[wc]="${CK8S_CONFIG_PATH:-}/.state/kube_config_wc.yaml"
 
-# shellcheck disable=SC231
+# shellcheck disable=SC2317
 log_info() {
     echo -e "[\e[34mck8s\e[0m] ${*}" 1>&2
 }
