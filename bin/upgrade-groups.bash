@@ -26,25 +26,25 @@ source "${here}/common.bash"
 source "${here}/inventory-parser.bash"
 
 list_groups() {
-    groups=$(readInventoryGroups "${config[groups_inventory_file]}")
+    groups=$(read_inventory_groups "${config[groups_inventory_file]}")
     for group in $groups; do
         log_info "- $group"
     done
 }
 
 upgrade_groups() {
-    total_nodes=$(getGroupHosts "${config[groups_inventory_file]}" "${group}" | wc -w)
+    total_nodes=$(get_group_hosts "${config[groups_inventory_file]}" "${group}" | wc -w)
     local -a groups
-    for group in $(readInventoryGroups "${config[groups_inventory_file]}" | sort); do
+    for group in $(read_inventory_groups "${config[groups_inventory_file]}" | sort); do
       if ! [[ "${group}" =~ ^(all|etcd|kube_node|.*:.*)$ ]]; then
         groups+=("${group}")
       fi
     done
 
     local -A group_lengths
-    group_lengths["kube_control_plane"]="$(getGroupHosts "${config[groups_inventory_file]}" "kube_control_plane" | wc -w)"
+    group_lengths["kube_control_plane"]="$(get_group_hosts "${config[groups_inventory_file]}" "kube_control_plane" | wc -w)"
     for group in "${groups[@]}"; do
-      group_lengths["${group}"]="$(getGroupHosts "${config[groups_inventory_file]}" "${group}" | wc -w)"
+      group_lengths["${group}"]="$(get_group_hosts "${config[groups_inventory_file]}" "${group}" | wc -w)"
     done
 
     pushd "${kubespray_path}"

@@ -6,12 +6,12 @@ here="$(dirname "$(readlink -f "$0")")"
 # shellcheck source=bin/common.bash
 source "${here}/common.bash"
 
-readInventoryGroups(){
+read_inventory_groups(){
   local filename="$1"
   gawk '{ if ($1 ~ /^\[[a-zA-Z0-9_:]{1,}\]/) section=tolower(gensub(/\[(.+)\]/,"\\1",1,$1)); configuration[section]=1 } END {for (key in configuration) { print key} }' "${filename}"
 }
 
-getGroupHosts() {
+get_group_hosts() {
   local filename="$1"
   local section="$2"
 
@@ -36,7 +36,7 @@ getGroupHosts() {
                     }' "${filename}"
 }
 
-getSection() {
+get_section() {
   local filename="$1"
   local section="$2"
 
@@ -54,7 +54,7 @@ getSection() {
                   }' "${filename}"
 }
 
-getHostVar() {
+get_host_var() {
   local filename="$1"
   local host="$2"
   local hostvar="$3"
@@ -83,10 +83,10 @@ getHostVar() {
                     }' "${filename}"
 }
 
-getHostVars() {
+get_host_vars() {
   local filename="$1"
   local host="$2"
-  if [[ "$(isHostInGroup "$filename" "$host" "all")" == "true" ]]; then
+  if [[ "$(is_host_in_group "$filename" "$host" "all")" == "true" ]]; then
     awk -v target_host="$host" \
               -F' ' '{
                         if ($1 ~ /^\[[a-zA-Z0-9_:]{1,}\]/)
@@ -117,13 +117,13 @@ getHostVars() {
   fi
 }
 
-setHostVar() {
+set_host_var() {
   local filename="$1"
   local host="$2"
   local hostvar="$3"
   local value="$4"
 
-  if [[ "$(isHostInGroup "$filename" "$host" "all")" ]]; then
+  if [[ "$(is_host_in_group "$filename" "$host" "all")" ]]; then
     awk -v target_host="$host"  -v hostvar="$hostvar"  -v val="$value" \
             -F' ' '{
                     exists=1
@@ -160,12 +160,12 @@ setHostVar() {
 
 }
 
-unsetHostVar() {
+unset_host_var() {
   local filename="$1"
   local host="$2"
   local hostvar="$3"
 
-  if [[ "$(isHostInGroup "$filename" "$host" "all")" ]]; then
+  if [[ "$(is_host_in_group "$filename" "$host" "all")" ]]; then
     awk -v target_host="$host"  -v hostvar="$hostvar"  \
             -F' ' '{
                     if ($1 ~ /^\[/) {
@@ -197,13 +197,13 @@ unsetHostVar() {
 
 }
 
-updateHostVar() {
+update_host_var() {
   local filename="$1"
   local host="$2"
   local hostvar="$3"
   local value="$4"
 
-  if [[ "$(isHostInGroup "${filename}" "${host}" all)" ]]; then
+  if [[ "$(is_host_in_group "${filename}" "${host}" all)" ]]; then
     awk -v target_host="$host"  -v hostvar="${hostvar}"  -v val="${value}" \
             -F' ' '{
                     if ($1 ~ /^\[/) {
@@ -235,35 +235,35 @@ updateHostVar() {
 
 }
 
-isHostInGroup() {
+is_host_in_group() {
   local filename="$1"
   local host="$2"
   local group="$3"
 
-  hosts="$(getGroupHosts "${filename}" "${group}")"
+  hosts="$(get_group_hosts "${filename}" "${group}")"
   for h in $hosts; do
     if [[ "$host" ==  "$h" ]]; then echo "true"; break; fi
   done
 }
 
-groupExists() {
+group_exists() {
   local filename="$1"
   local group="$2"
 
-  groups="$(readInventoryGroups "$filename")"
+  groups="$(read_inventory_groups "$filename")"
   for g in $groups; do
     if [[ "$group" == "$g" ]]; then  echo "true"; break; fi
   done
 
 }
 
-addHostToGroup() {
+add_host_to_group() {
   local filename="$1"
   local host="$2"
   local group="$3"
 
-  hostDefined="$(isHostInGroup "$filename" "$host" all)"
-  hostExists="$(isHostInGroup "$filename" "$host" "$group")"
+  hostDefined="$(is_host_in_group "$filename" "$host" all)"
+  hostExists="$(is_host_in_group "$filename" "$host" "$group")"
 
   if [[ "$hostDefined" == "true" || "$group" == "all" ]]; then
     if [[ "$hostExists" == "true" ]]; then
@@ -277,13 +277,13 @@ addHostToGroup() {
   fi
 }
 
-addHostToGroupAsLast() {
+add_host_to_group_as_last() {
   local filename="$1"
   local host="$2"
   local group="$3"
 
-  hostDefined="$(isHostInGroup "$filename" "$host" all)"
-  hostExists="$(isHostInGroup "$filename" "$host" "$group")"
+  hostDefined="$(is_host_in_group "$filename" "$host" all)"
+  hostExists="$(is_host_in_group "$filename" "$host" "$group")"
 
   if [[ "$hostDefined" == "true" || "$group" == "all" ]]; then
     if [[ "$hostExists" == "true" ]]; then
@@ -298,12 +298,12 @@ addHostToGroupAsLast() {
   fi
 }
 
-removeHostFromGroup() {
+remove_host_from_group() {
   local filename="$1"
   local host="$2"
   local group="$3"
 
-  if [[ "$(isHostInGroup "$filename" "$host" all)" == "true" ]]; then
+  if [[ "$(is_host_in_group "$filename" "$host" all)" == "true" ]]; then
     awk -v target_host="$host" -v target_group="$group" \
         -F' ' '{
                 global_removal=1
@@ -333,11 +333,11 @@ removeHostFromGroup() {
   fi
 }
 
-addGroup() {
+add_group() {
   local filename="$1"
   local group="$2"
 
-  if [[ "$(groupExists "$filename" "$group")" == "true" ]]; then
+  if [[ "$(group_exists "$filename" "$group")" == "true" ]]; then
     log_warning "Group $group already exists"
   else
     echo -e "\n\n[$group]" >> "$filename"

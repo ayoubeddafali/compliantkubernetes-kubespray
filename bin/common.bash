@@ -390,11 +390,11 @@ assignHost() {
     secondary_group_label=$(yq4 .group_label_secondary "${config_path}/group_vars/all/ck8s-kubespray-general.yaml")
     if [[ $(ops_kubectl "$prefix" get node "$node" -ojson | jq ".metadata.labels | has(\"${control_plane_label}\")") == "true" ]]; then
         target_group="kube_control_plane"
-        if [[ "$(groupExists "${config[groups_inventory_file]}" "$target_group")" != "true" ]]; then
+        if [[ "$(group_exists "${config[groups_inventory_file]}" "$target_group")" != "true" ]]; then
             log_info "Adding $target_group group to ${config[groups_inventory_file]} .."
-            addGroup "${config[groups_inventory_file]}" "$target_group"
+            add_group "${config[groups_inventory_file]}" "$target_group"
         fi
-        addHostToGroup "${config[groups_inventory_file]}" "$node" "$target_group"
+        add_host_to_group "${config[groups_inventory_file]}" "$node" "$target_group"
     elif [[ $(ops_kubectl "$prefix" get node "$node" -ojson | jq ".metadata.labels | has(\"${primary_group_label}\")") == "true" ]]; then
         node_type=$(ops_kubectl "$prefix" get node "$node" -ojson | jq -r ".metadata.labels[\"${primary_group_label}\"]")
         if [[ $(ops_kubectl "$prefix" get node "$node" -ojson | jq ".metadata.labels | has(\"${secondary_group_label}\")") == "true" ]]; then
@@ -403,34 +403,34 @@ assignHost() {
         else
             target_group="${node_type}"
         fi
-        if [[ "$(groupExists "${config[groups_inventory_file]}" "$target_group")" != "true" ]]; then
+        if [[ "$(group_exists "${config[groups_inventory_file]}" "$target_group")" != "true" ]]; then
             log_info "Adding $target_group group to ${config[groups_inventory_file]} .."
-            addGroup "${config[groups_inventory_file]}" "$target_group"
+            add_group "${config[groups_inventory_file]}" "$target_group"
         fi
 
         if [[ "$node_type" == "postgres" ]]; then
             if [[ $(ops_kubectl "$prefix" get pods -A -l application=spilo,cluster-name="$cluster_name" -ojson | jq -r '.items[] | select( .metadata.labels["spilo-role"] == "master" ).spec.nodeName') == "$node" ]]; then
-                addHostToGroupAsLast "${config[groups_inventory_file]}" "$node" "$target_group"
+                add_host_to_group_as_last "${config[groups_inventory_file]}" "$node" "$target_group"
             else
-                addHostToGroup "${config[groups_inventory_file]}" "$node" "$target_group"
+                add_host_to_group "${config[groups_inventory_file]}" "$node" "$target_group"
             fi
         else
-            addHostToGroup "${config[groups_inventory_file]}" "$node" "$target_group"
+            add_host_to_group "${config[groups_inventory_file]}" "$node" "$target_group"
         fi
 
 
     # Check for regular nodes
     else
         target_group="regular_worker"
-        if [[ "$(groupExists "${config[groups_inventory_file]}" "$target_group")" != "true" ]]; then
+        if [[ "$(group_exists "${config[groups_inventory_file]}" "$target_group")" != "true" ]]; then
             log_info "Adding $target_group group to ${config[groups_inventory_file]} .."
-            addGroup "${config[groups_inventory_file]}" "$target_group"
+            add_group "${config[groups_inventory_file]}" "$target_group"
         fi
-        addHostToGroup "${config[groups_inventory_file]}" "$node" "$target_group"
+        add_host_to_group "${config[groups_inventory_file]}" "$node" "$target_group"
     fi
 }
 
-containsElement () {
+contains_element () {
   local e match="$1"
   shift
   for e; do [[ "$e" == "$match" ]] && return 0; done
