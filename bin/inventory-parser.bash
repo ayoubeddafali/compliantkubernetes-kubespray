@@ -20,9 +20,10 @@ get_group_hosts() {
   local section="$2"
   hosts=()
 
+  # shellcheck disable=SC2091
   if [[ ${section} == "all" ]]; then
     readarray -td '' hosts < <(ansible-inventory -i "$filename" --list |  jq -r "._meta.hostvars | keys[]")
-  elif $(ansible-inventory -i "$filename" --list | jq ".$section | has(\"hosts\")" ); then
+  elif $(ansible-inventory -i "$filename" --list | jq ".$section | has(\"hosts\")"); then
     readarray -td '' hosts < <(ansible-inventory -i "$filename" --list | jq -r ".$section.hosts[]")
   fi
 
@@ -35,6 +36,7 @@ group_has_children() {
   local filename="$1"
   local section="$2"
 
+  # shellcheck disable=SC2091
   if $(ansible-inventory -i "$filename" --list | jq ".$section | has(\"children\")" ); then
     echo true; return ;
   fi
@@ -49,6 +51,7 @@ get_group_children() {
   local section="$2"
   hosts=()
 
+  # shellcheck disable=SC2091
   if $(ansible-inventory -i "$filename" --list | jq ".$section | has(\"children\")" ); then
     readarray -td '' hosts < <(ansible-inventory -i "$filename" --list | jq -r ".$section.children[]")
   fi
@@ -71,6 +74,7 @@ get_section() {
   local filename="$1"
   local section="$2"
   output="[${section}]\n"
+  # shellcheck disable=SC2091
   if $(ansible-inventory -i "$filename" --list | jq ".$section | has(\"hosts\")" ); then
     output+=$(get_group_hosts "${filename}" "${section}")
   elif $(group_has_children "$filename" "${section}" ); then
@@ -112,8 +116,7 @@ is_host_in_group() {
   local host="$2"
   local group="$3"
 
-  hosts="$(get_group_hosts "${filename}" "${group}")"
-  for h in ${hosts}; do
+  for h in $(get_group_hosts "${filename}" "${group}"); do
     if [[ "$host" ==  "$h" ]]; then echo "true"; return; fi
   done
 
