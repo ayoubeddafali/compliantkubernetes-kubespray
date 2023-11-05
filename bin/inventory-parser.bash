@@ -31,7 +31,7 @@ get_group_hosts() {
 }
 
 # Check if group has children
-# Args: <inventory> <gropu>
+# Args: <inventory> <group>
 group_has_children() {
   local filename="$1"
   local section="$2"

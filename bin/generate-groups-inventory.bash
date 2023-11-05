@@ -40,6 +40,7 @@ else
     log_error "Error: [kube_node] group is not defined in ${config[inventory_file]}"
 fi
 
+# shellcheck disable=SC2091
 if [[ "$(group_exists "${config[inventory_file]}" k8s_cluster)" == "true" ]]; then
   if $(group_has_children "${config[inventory_file]}" k8s_cluster); then
     k8s_cluster_children="$(get_group_children "${config[inventory_file]}" k8s_cluster)"
