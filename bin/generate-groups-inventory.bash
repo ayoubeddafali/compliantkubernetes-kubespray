@@ -30,21 +30,22 @@ if [[ "$(group_exists "${config[inventory_file]}" etcd)" == "true" ]]; then
     etcd_section="$(get_section "${config[inventory_file]}" etcd)"
     echo -e "$etcd_section\n" >> "${config[groups_inventory_file]}"
 else
-    log_error "Error: [etcd] group is defined in ${config[inventory_file]}"
+    log_error "Error: [etcd] group is not defined in ${config[inventory_file]}"
 fi
 
 if [[ "$(group_exists "${config[inventory_file]}" kube_node)" == "true" ]]; then
     kube_node_section="$(get_section "${config[inventory_file]}" kube_node)"
     echo -e "$kube_node_section\n" >> "${config[groups_inventory_file]}"
 else
-    log_error "Error: [kube_node] group is defined in ${config[inventory_file]}"
+    log_error "Error: [kube_node] group is not defined in ${config[inventory_file]}"
 fi
 
-if [[ "$(group_exists "${config[inventory_file]}" k8s_cluster:children)" == "true" ]]; then
-    k8s_children_section="$(get_section "${config[inventory_file]}" k8s_cluster:children)"
-    echo -e "$k8s_children_section" >> "${config[groups_inventory_file]}"
+if [[ "$(group_exists "${config[inventory_file]}" k8s_cluster)" == "true" ]]; then
+    k8s_cluster_children="$(get_group_children "${config[inventory_file]}" k8s_cluster)"
+    add_group "${config[groups_inventory_file]}" "k8s_cluster:children"
+    echo -e "$k8s_cluster_children" >> "${config[groups_inventory_file]}"
 else
-    log_error "Error: [k8s_cluster:children] group is defined in ${config[inventory_file]}"
+    log_error "Error: [k8s_cluster:children] group is not defined in ${config[inventory_file]}"
 fi
 
 # shellcheck disable=SC2154

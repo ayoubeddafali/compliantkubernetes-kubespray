@@ -28,15 +28,57 @@ get_group_hosts() {
 
   echo "${hosts[@]}"
 }
+# Get the children of a specific group
+# Args: <inventory> <group>
+get_group_children() {
+  local filename="$1"
+  local section="$2"
+  hosts=()
+
+  if $(ansible-inventory -i "$filename" --list | jq ".$section | has(\"children\")" ); then
+    readarray -td '' hosts < <(ansible-inventory -i "$filename" --list | jq -r ".$section.children[]")
+  fi
+
+  echo "${hosts[@]}"
+}
+
+# Get all hosts
+# Args: <inventory>
+get_all_hosts() {
+  local filename="$1"
+  readarray -td '' all < <(ansible-inventory -i "$filename" --list | jq -r "._meta.hostvars | keys[]")
+
+  echo "${all[@]}"
+}
 
 # Get the full section of a group
 # Args: <inventory> <group>
 get_section() {
   local filename="$1"
   local section="$2"
+  output="[${section}]\n"
+  if $(ansible-inventory -i "$filename" --list | jq ".$section | has(\"hosts\")" ); then
+    get_group_hosts "${filename}" "${section}"
+  elif $(ansible-inventory -i "$filename" --list | jq ".$section | has(\"children\")" ); then
+    if [[ "$section" == "all" ]]; then
+      all_hosts=$(get_all_hosts "${filename}")
+      variables=("ansible_host" "ip" "etcd_member_name")
+      for host in ${all_hosts}; do
+        output+="${host}"
+        for var in "${variables[@]}"; do
+          if $(ansible-inventory -i "$filename" --list | jq "._meta.hostvars[\"$host\"] | has(\"$var\")"); then
+            value=$(ansible-inventory -i "$filename" --list | jq -r "._meta.hostvars[\"$host\"].$var")
+            output+=" ${var}=${value}"
+          fi
+        done
+        output+="\n"
+      done
+    else
+      ansible-inventory -i "$filename" --list | jq -r ".$section.children[]"
+    fi
+  fi
 
-  echo "[${section}]"
-  get_group_hosts "${filename}" "${section}"
+  echo -ne "$output"
 }
 
 # Get the value of a host variable
