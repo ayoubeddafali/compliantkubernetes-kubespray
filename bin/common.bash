@@ -381,7 +381,7 @@ ops_kubectl() { # <prefix> <args...>
     with_kubeconfig "$kubeconfig" kubectl "${@}"
 }
 
-assignHost() {
+assign_host() {
     local node=$1
     # Check for control plane nodes
     control_plane_label=$(yq4 .control_plane_label "${config_path}/group_vars/all/ck8s-kubespray-general.yaml")

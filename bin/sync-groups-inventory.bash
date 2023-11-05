@@ -33,7 +33,7 @@ for host in $(get_group_hosts "${config[inventory_file]}" all); do
             value=$(get_host_var "${config[inventory_file]}" "$host" "$hostvar")
             set_host_var "${config[groups_inventory_file]}" "$host" "$hostvar" "$value"
         done
-        assignHost "$host"
+        assign_host "$host"
     fi
 done
 

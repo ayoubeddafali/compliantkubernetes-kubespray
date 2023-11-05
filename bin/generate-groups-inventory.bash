@@ -41,9 +41,14 @@ else
 fi
 
 if [[ "$(group_exists "${config[inventory_file]}" k8s_cluster)" == "true" ]]; then
+  if $(group_has_children "${config[inventory_file]}" k8s_cluster); then
     k8s_cluster_children="$(get_group_children "${config[inventory_file]}" k8s_cluster)"
     add_group "${config[groups_inventory_file]}" "k8s_cluster:children"
     echo -e "$k8s_cluster_children" >> "${config[groups_inventory_file]}"
+  else
+    k8s_cluster_section="$(get_section "${config[inventory_file]}" k8s_cluster)"
+    echo -e "$k8s_cluster_section\n" >> "${config[groups_inventory_file]}"
+  fi
 else
     log_error "Error: [k8s_cluster:children] group is not defined in ${config[inventory_file]}"
 fi
@@ -52,5 +57,5 @@ fi
 nodes=$(ops_kubectl "$prefix" get nodes -o=jsonpath='{.items[*].metadata.name}')
 
 for node in $nodes; do
-    assignHost "$node"
+    assign_host "$node"
 done

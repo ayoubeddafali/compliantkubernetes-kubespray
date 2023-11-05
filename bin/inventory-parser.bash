@@ -28,6 +28,20 @@ get_group_hosts() {
 
   echo "${hosts[@]}"
 }
+
+# Check if group has children
+# Args: <inventory> <gropu>
+group_has_children() {
+  local filename="$1"
+  local section="$2"
+
+  if $(ansible-inventory -i "$filename" --list | jq ".$section | has(\"children\")" ); then
+    echo true; return ;
+  fi
+
+  echo "false";
+}
+
 # Get the children of a specific group
 # Args: <inventory> <group>
 get_group_children() {
@@ -58,9 +72,9 @@ get_section() {
   local section="$2"
   output="[${section}]\n"
   if $(ansible-inventory -i "$filename" --list | jq ".$section | has(\"hosts\")" ); then
-    get_group_hosts "${filename}" "${section}"
-  elif $(ansible-inventory -i "$filename" --list | jq ".$section | has(\"children\")" ); then
-    if [[ "$section" == "all" ]]; then
+    output+=$(get_group_hosts "${filename}" "${section}")
+  elif $(group_has_children "$filename" "${section}" ); then
+    if [[ "${section}" == "all" ]]; then
       all_hosts=$(get_all_hosts "${filename}")
       variables=("ansible_host" "ip" "etcd_member_name")
       for host in ${all_hosts}; do
@@ -74,11 +88,11 @@ get_section() {
         output+="\n"
       done
     else
-      ansible-inventory -i "$filename" --list | jq -r ".$section.children[]"
+      output+=$(get_group_children "${filename}" "${section}")
     fi
   fi
 
-  echo -ne "$output"
+  echo -ne "${output}\n"
 }
 
 # Get the value of a host variable
